@@ -5,6 +5,7 @@ Module Bookstore
       ShortString Code { AutoCode; }
       ShortString Title;
       Integer NumberOfPages;
+      ShortString Author;
 
       ItemFilter CommonMisspelling 'book => book.Title.Contains("curiousity")';
       InvalidData CommonMisspelling 'It is not allowed to enter misspelled word "curiousity".';
