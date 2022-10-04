@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(o => o.CustomSchemaIds(type => type.ToString()));
 
 builder.Services.AddRhetosHost((serviceProvider, rhetosHostBuilder) => rhetosHostBuilder
         .ConfigureRhetosAppDefaults()
@@ -15,7 +15,12 @@ builder.Services.AddRhetosHost((serviceProvider, rhetosHostBuilder) => rhetosHos
         .ConfigureConfiguration(cfg => cfg.MapNetCoreConfiguration(builder.Configuration)))
     .AddAspNetCoreIdentityUser()
     .AddHostLogging()
-    .AddDashboard();
+    .AddDashboard()
+    .AddRestApi(o =>
+    {
+        o.BaseRoute = "rest";
+        o.GroupNameMapper = (conceptInfo, controller, oldName) => "v1";
+    });
 
 var app = builder.Build();
 
@@ -29,6 +34,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseRhetosRestApi();
 
 app.MapControllers();
 
