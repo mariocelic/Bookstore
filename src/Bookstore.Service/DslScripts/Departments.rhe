@@ -1,0 +1,14 @@
+﻿Module Bookstore
+{
+    Entity Departments
+    {
+        ShortString Code { Unique; Required; }
+        LongString Description;
+    }
+
+    Entity EmployeeDepartment
+    {
+        Reference Employees { Detail; }
+        Reference Departments { Required; }
+    }
+}

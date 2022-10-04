@@ -47,27 +47,7 @@ Module Bookstore
         Reference Topic { Required; }
 
         UniqueMultiple 'Book Topic';
-    }
-
-    Entity Employees
-    {
-        ShortString Name;
-        ShortString VAT { Unique; Required; }
-    }
-
-    Entity Manager
-    {
-        Extends Bookstore.Employees;
-
-        ShortString Bonuses;
-    }
-
-    Entity EducationRecords
-    {
-        Reference Employees { Detail; }
-        Date RecordDate;
-        LongString Description;
-    }
+    }   
 }
 
 
