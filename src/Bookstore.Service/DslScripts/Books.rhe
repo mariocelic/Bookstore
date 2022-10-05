@@ -94,10 +94,8 @@ Module Bookstore
     {
         Extends Bookstore.Book;
         Integer NumberOfItems;
-
-
-
-       AutodetectSqlDependencies;
+        
+        AutodetectSqlDependencies;
     }
         
     Browse AssignmentBookstoreGrid Bookstore.Book
@@ -151,6 +149,27 @@ Module Bookstore
         Extends Bookstore.Book;
         Decimal Rating;
     }
+
+    Hardcoded Genre
+    {
+        ShortString Label; // Short text displayed to user.
+        LongString Description;
+        Bool IsFiction;
+
+        Entry ScienceFiction
+        {
+            Value Label 'Science fiction';
+            Value Description 'A speculative fiction with imagined elements that are inspired by natural sciences or social sciences.';
+            Value IsFiction 1;
+        }
+
+        Entry Biography
+        {
+            Value Label 'Biography';
+            Value Description 'A written narrative of a person''s life.';
+            Value IsFiction 0;
+        }
+    }    
 }
 
 
