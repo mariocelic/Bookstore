@@ -2,8 +2,12 @@
 {
     Entity Employees
     {
+        Deactivatable;
         ShortString Name;
-        ShortString VAT { Unique; Required; }
+        ShortString VAT { Unique; Required; DenyUserEdit; }     
+        DateTime VATChange { ModificationTimeOf Bookstore.Employees.VAT; }
+
+        Logging { AllProperties; }
     }
 
     Entity Manager
@@ -16,7 +20,7 @@
     Entity EducationRecords
     {
         Reference Employees { Detail; }
-        Date RecordDate;
+        DateTime RecordDate { CreationTime;}
         LongString Description;
     }
 }

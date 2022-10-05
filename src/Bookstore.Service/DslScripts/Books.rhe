@@ -5,7 +5,12 @@ Module Bookstore
         ShortString Code { Unique; Required; }
         ShortString Title { Required; }
         Integer NumberOfPages;
-        Reference Author Bookstore.Person;
+        Money Price { DefaultValue 'item => (decimal)5.5'; }   
+        
+        ItemFilter PriceNegative 'item => item.Price < 0';
+		LockProperty Price.PriceNegative 'Title is locked if price negative.';
+
+        Reference Author Bookstore.Person;        
     }
 
     Entity Person
@@ -25,7 +30,7 @@ Module Bookstore
 
         Integer AgeFrom;
         Integer AgeTo;
-        IntegerRange AgeFrom AgeTo; // A simple validation.
+        IntegerRange AgeFrom AgeTo;
     }
 
     Entity ForeignBook

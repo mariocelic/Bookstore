@@ -2,7 +2,7 @@
 {
     Entity Departments
     {
-        ShortString Code { Unique; Required; }
+        Integer Code { Unique; Required; AutoCode; }
         LongString Description;
     }
 
