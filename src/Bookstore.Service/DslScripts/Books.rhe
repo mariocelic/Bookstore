@@ -7,8 +7,8 @@ Module Bookstore
         Integer NumberOfPages;
         Money Price { DefaultValue 'item => (decimal)5.5'; }   
         
-        ItemFilter PriceNegative 'item => item.Price < 0';
-		LockProperty Price.PriceNegative 'Title is locked if price negative.';
+        // ItemFilter PriceNegative 'item => item.Price < 0';
+		// LockProperty Price.PriceNegative 'Title is locked if price negative.';
 
         Reference Author Bookstore.Person;        
     }
@@ -53,6 +53,104 @@ Module Bookstore
 
         UniqueMultiple 'Book Topic';
     }   
+
+    Browse BookGrid Bookstore.Book
+    {
+        Take Code;
+        Take Title;
+        Take 'Author.Name';
+        Take TranslatorName 'Extension_ForeignBook.Translator.Name';
+    }
+
+    SqlQueryable BookInfo
+    "
+        SELECT
+            b.ID,
+            NumberOfComments = COUNT(c.ID)
+        FROM
+            Bookstore.Book b
+            LEFT JOIN Bookstore.Comment c ON c.BookID = b.ID
+        GROUP BY
+            b.ID
+    "
+    {
+        Extends Bookstore.Book;
+        Integer NumberOfComments;
+
+        AutodetectSqlDependencies;
+    }
+
+    SqlQueryable BookTopicInfo
+    "
+        SELECT
+            B.ID,
+            NumberOfItems = COUNT(BT.ID)
+        FROM
+            [Bookstore].[Book] AS B
+            LEFT JOIN [Bookstore].[BookTopic] AS BT ON BT.BookId = B.ID
+        GROUP BY
+            B.ID
+    "
+    {
+        Extends Bookstore.Book;
+        Integer NumberOfItems;
+
+
+
+       AutodetectSqlDependencies;
+    }
+        
+    Browse AssignmentBookstoreGrid Bookstore.Book
+    {
+        Take Title;
+        Take 'Author.Name';
+        Take NumberOfTopics 'Extension_BookTopicInfo.NumberOfItems';
+    }
+
+    Browse BookGrid Bookstore.Book
+    {
+        Take Code;
+        Take Title;
+        Take 'Author.Name';
+        Take TranslatorName 'Extension_ForeignBook.Translator.Name';
+        Take NumberOfComments 'Extension_BookInfo.NumberOfComments';
+    }
+
+    Computed ExpectedBookRating 'repository =>
+        {
+            var books = repository.Bookstore.Book.Query()
+                .Select(b =>
+                    new
+                    {
+                        b.ID,
+                        b.Title,
+                        IsForeign = b.Extension_ForeignBook.ID != null
+                    })
+                .ToList();
+
+            var ratings = new List<ExpectedBookRating>();
+            foreach (var book in books)
+            {
+                decimal rating = 0;
+
+                if (book.Title?.IndexOf("super", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    rating += 100;
+
+                if (book.Title?.IndexOf("great", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    rating += 50;
+
+                if (book.IsForeign)
+                    rating *= 1.2m;
+
+                ratings.Add(new ExpectedBookRating { ID = book.ID, Rating = rating });
+            }
+
+            return ratings.ToArray();
+        }'
+    {
+        Extends Bookstore.Book;
+        Decimal Rating;
+    }
 }
 
 
@@ -60,7 +158,7 @@ Module Bookstore
 // FLAT STATEMENT
 // Module Bookstore;
 // Entity Bookstore.Book;
-// ShortString Bookstore.Book.Code { AutoCode; }
+// ShortString Bookstore.Book.Code { AutoCode Bookstore.Book.Code; }
 // ShortString Bookstore.Book.Title;
 // Integer Bookstore.Book.NumberOfPages;
 // ShortString Bookstore.Book.Author;
