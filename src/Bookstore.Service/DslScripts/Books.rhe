@@ -195,6 +195,12 @@ Module Bookstore
         Integer NumberOfBooks;
         ShortString TitlePrefix;
     }
+
+    Action InsertRandomBook
+        '(parameter, repository, userInfo) => Bookstore.Service.RandomBookGenerator.InsertBooks(repository, parameter.NumberOfBooks)'
+    {
+        Integer NumberOfBooks;
+    }
 }
 
 
