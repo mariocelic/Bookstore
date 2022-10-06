@@ -2,13 +2,19 @@ Module Bookstore
 {
     Entity Book
     {
-        ShortString Code { Unique; Required; }
+        ShortString Code { Unique; Required; AutoCode; }
         ShortString Title { Required; }
         Integer NumberOfPages;
         Money Price { DefaultValue 'item => (decimal)5.5'; }   
         
-        // ItemFilter PriceNegative 'item => item.Price < 0';
-		// LockProperty Price.PriceNegative 'Title is locked if price negative.';
+        ItemFilter PriceNegative 'item => item.Price < 0';
+        InvalidData PriceNegative 'Price can not be minus';
+
+        ComposableFilterBy PriceNegative2 '(query, repository, parameter) =>
+            {
+                return query.Where(item => item.Price < 0);
+            }';
+        InvalidData PriceNegative2 'Price can not be minus';
 
         ItemFilter LongBooks 'item => item.NumberOfPages >= 500';
 
@@ -63,6 +69,10 @@ Module Bookstore
             }';
     }
 
+    Parameter PriceNegative2
+    {
+    }
+
     Parameter LongBooks2
     {
     }
@@ -78,6 +88,47 @@ Module Bookstore
         Integer MinimumPages;
         Bool ForeignBooksOnly;
         Bool MaskTitles;
+    }
+
+    Entity Disposal
+    {
+        Reference Book { Required; }
+        LongString Explanation { Required; }
+        DateTime EffectiveSince { CreationTime; }
+
+        ItemFilter ImportantBookExplanation 'item => item.Book.Title.Contains("important") && item.Explanation.Length < 50';
+        InvalidData ImportantBookExplanation 'When disposing an important book, the explanation should be at least 50 characters long.';
+
+        ItemFilter HighRating 'item => item.Book.Extension_BookRating.Rating > 100';
+        InvalidData HighRating 'You are not allowed to dispose a book with rating above 100.';
+
+        // ItemFilter UncertainExplanations 'disposal => _domRepository.Bookstore.UncertainWord.Subquery
+        //     .Any(uncertain => disposal.Explanation.Contains(uncertain.Word))';
+        // InvalidData UncertainExplanations 'The explanation "{0}{1}" should not contain word "{2}". Book: {3}.'
+        // {
+        //     MessageParametersItem 'item => new
+        //         {
+        //             item.ID,
+        //             P0 = item.Explanation.Substring(0, 10),
+        //             P1 = item.Explanation.Length > 10 ? "..." : "",
+        //             P2 = _domRepository.Bookstore.UncertainWord.Subquery
+        //                 .Where(uncertain => item.Explanation.Contains(uncertain.Word))
+        //                 .Select(uncertain => uncertain.Word).FirstOrDefault(),
+        //             P3 = item.Book.Title
+        //         }';
+        // }
+
+        ItemFilter ExplanationTooLong 'item => item.Explanation.Length > 500';
+        InvalidData ExplanationTooLong 'The {0} cannot be longer then {1} characters.'
+        {
+            MessageParametersConstant '"Explanation", 500';
+        }
+    }
+
+    Entity BookRating
+    {
+        Extends Bookstore.Book;
+        Decimal Rating; // ComputedFrom Bookstore.ComputeBookRating
     }
 
     Entity Person
