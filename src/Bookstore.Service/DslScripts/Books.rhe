@@ -90,6 +90,18 @@ Module Bookstore
         Bool MaskTitles;
     }
 
+    Entity Review
+    {
+        Reference Book { Required; }
+        Integer Score { Required; MinValue 1; MaxValue 5; }
+        LongString Text;
+
+        SaveMethod
+        {
+            // ... Insert the examples from this tutorial here. ...
+        }
+    }
+
     Entity Disposal
     {
         Reference Book { Required; }
@@ -319,6 +331,8 @@ Module Bookstore
     {
         Integer NumberOfBooks;
     }
+
+    SqlView ExpensiveBooks <SQL\ExpensiveBooks2.sql>;
 }
 
 
