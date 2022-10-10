@@ -2,11 +2,11 @@ Module Bookstore
 {
     Entity Book
     {
-        ShortString Code { Unique; Required; AutoCode; }
+        ShortString Code { Unique; Required; AutoCode; DefaultValue 'item => "B+++"'; }
         ShortString Title { Required; }
-        Integer NumberOfPages;
         Money Price { DefaultValue 'item => (decimal)5.5'; }   
-        
+        Integer NumberOfPages;
+                
         ItemFilter PriceNegative 'item => item.Price < 0';
         InvalidData PriceNegative 'Price can not be minus';
 
@@ -67,6 +67,31 @@ Module Bookstore
                 return query.Where(book => book.AuthorID == author.ID
                     || book.Author.Name == author.Name);
             }';
+
+        Is Bookstore.SalesItem
+        {
+            Implements Bookstore.SalesItem.Description "Title
+                + ISNULL(', ' + CAST(NumberOfPages AS NVARCHAR(10)) + ' pages', '')";
+                
+            Where 'Price IS NOT NULL';
+        }
+
+        Is Bookstore.SalesAuthor
+        {
+            Implements Bookstore.SalesAuthor.Description "Title + ' ' + Author.Name";
+        }
+    }
+    Polymorphic SalesItem
+    {
+        ShortString Code;
+        Money Price;
+        ShortString Description;
+    }
+
+    Polymorphic SalesAuthor
+    {
+        ShortString Code;
+        ShortString Description;
     }
 
     Parameter PriceNegative2
@@ -88,6 +113,32 @@ Module Bookstore
         Integer MinimumPages;
         Bool ForeignBooksOnly;
         Bool MaskTitles;
+    }
+
+
+    Entity Food
+    {
+        ShortString Code { AutoCode; DefaultValue 'item => "F+++"'; }
+        Money Price { Required; }
+        ShortString Description;
+        Integer Calories;
+
+        Is Bookstore.SalesItem;
+    }
+
+    Browse SalesItemGrid Bookstore.SalesItem
+    {
+        Take Code;
+        Take Price;
+        Take 'Book.NumberOfPages';
+    }
+
+    // Polymorphic can even have a detail entity:
+
+    Entity SalesItemComment
+    {
+        Reference SalesItem { Detail; }
+        LongString Comment;
     }
 
     Entity Review
