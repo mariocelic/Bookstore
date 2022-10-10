@@ -4,8 +4,10 @@ Module Bookstore
     {
         ShortString Code { Unique; Required; AutoCode; DefaultValue 'item => "B+++"'; }
         ShortString Title { Required; }
-        Money Price { DefaultValue 'item => (decimal)5.5'; }   
+        ShortString AuthorName;
+        Money Price { DefaultValue 'item => (decimal)5.5'; }          
         Integer NumberOfPages;
+        
                 
         ItemFilter PriceNegative 'item => item.Price < 0';
         InvalidData PriceNegative 'Price can not be minus';
@@ -78,7 +80,7 @@ Module Bookstore
 
         Is Bookstore.SalesAuthor
         {
-            Implements Bookstore.SalesAuthor.Description "Title + ' ' + Author.Name";
+            Implements Bookstore.SalesAuthor.Description "Title + ' ' + AuthorName";
         }
     }
     Polymorphic SalesItem
@@ -90,8 +92,9 @@ Module Bookstore
 
     Polymorphic SalesAuthor
     {
-        ShortString Code;
-        ShortString Description;
+        ShortString Code;        
+        ShortString Description;   
+        ShortString AuthorName;
     }
 
     Parameter PriceNegative2
@@ -131,6 +134,12 @@ Module Bookstore
         Take Code;
         Take Price;
         Take 'Book.NumberOfPages';
+    }
+
+    Browse SalesAuthorGrid Bookstore.SalesAuthor
+    {
+        Take Code;
+        Take AuthorName;
     }
 
     // Polymorphic can even have a detail entity:
